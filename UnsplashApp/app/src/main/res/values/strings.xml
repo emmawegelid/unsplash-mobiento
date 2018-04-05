@@ -2,4 +2,5 @@
     <string name="app_name">UnsplashApp</string>
 
     <string name="search_field_hint">Search</string>
+    <string name="image_search_title">Image search</string>
 </resources>
