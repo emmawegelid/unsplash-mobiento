@@ -1,18 +1,19 @@
 package com.example.emmawegelid.unsplashapp.screens;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.example.emmawegelid.unsplashapp.R;
+import com.example.emmawegelid.unsplashapp.listeners.ImageSearchListener;
 import com.example.emmawegelid.unsplashapp.models.Image;
 import com.example.emmawegelid.unsplashapp.network.NetworkManager;
 import com.example.emmawegelid.unsplashapp.network.wrappers.ImageSearchWrapper;
@@ -33,7 +34,7 @@ import static com.example.emmawegelid.unsplashapp.screens.ImageItemViewHolder.IM
 
 public class ImageSearchFragment extends Fragment {
 
-    public static final String TAG = Fragment.class.getSimpleName();
+    public static final String TAG = ImageSearchFragment.class.getSimpleName();
 
     private static final int SEARCH_QUERY_MIN_LENGTH = 3;
     private static final int SEARCH_DEBOUNCE = 300;
@@ -41,6 +42,7 @@ public class ImageSearchFragment extends Fragment {
     private final CompositeDisposable disposables = new CompositeDisposable();
 
     private RecyclerMultiAdapter imagesAdapter;
+    private ImageSearchListener imageSearchListener;
 
     @BindView(R.id.searchEditText)
     EditText searchEditText;
@@ -53,9 +55,11 @@ public class ImageSearchFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getActivity().setTitle("Image search");
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof ImageSearchListener) {
+            imageSearchListener = (ImageSearchListener) context;
+        }
     }
 
     @Override
@@ -66,6 +70,18 @@ public class ImageSearchFragment extends Fragment {
         initRecyclerView();
         initListener();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().setTitle("Image search");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        imageSearchListener = null;
     }
 
     @Override
@@ -96,9 +112,10 @@ public class ImageSearchFragment extends Fragment {
 
     private void initListener() {
         ViewEventListener listener = (actionId, object, position, view) -> {
+            Image image = (Image) object;
             switch (actionId) {
                 case IMAGE_TAPPED:
-                    showFullScreenImage();
+                    showFullScreenImage(image.urls.regular);
                     break;
             }
         };
@@ -106,22 +123,28 @@ public class ImageSearchFragment extends Fragment {
         imagesAdapter.setViewEventListener(listener);
     }
 
-    private void showFullScreenImage() {
+    private void showFullScreenImage(String imageUrl) {
+        hideKeyboard();
+        imageSearchListener.openFullScreenImage(imageUrl);
+    }
 
+    private void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getActivity().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     private void search(String query) {
-        NetworkManager.getInstance()
+        disposables.clear();
+        disposables.add(NetworkManager.getInstance()
                 .getApiClient()
                 .searchForImages(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSearchForImagesSuccess, this::onSearchForImagesError);
+                .subscribe(this::onSearchForImagesSuccess));
 
-    }
-
-    private void onSearchForImagesError(Throwable throwable) {
-        Log.d("Error: ", throwable.getMessage());
     }
 
     private void onSearchForImagesSuccess(ImageSearchWrapper.Response response) {
