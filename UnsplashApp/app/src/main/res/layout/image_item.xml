@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:padding="@dimen/padding_s"
+    android:padding="@dimen/padding_m"
     android:id="@+id/rootLayout">
 
     <com.example.emmawegelid.unsplashapp.screens.GridViewItem
