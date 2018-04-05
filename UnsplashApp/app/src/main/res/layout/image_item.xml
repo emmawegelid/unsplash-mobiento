@@ -4,12 +4,12 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:padding="4dp"
+    android:padding="@dimen/padding_s"
     android:id="@+id/rootLayout">
 
     <com.example.emmawegelid.unsplashapp.screens.GridViewItem
         android:id="@+id/imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"/>
+        android:layout_width="@dimen/image_thumb_nail_size"
+        android:layout_height="@dimen/image_thumb_nail_size"/>
 
 </RelativeLayout>

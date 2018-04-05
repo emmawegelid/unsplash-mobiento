@@ -38,6 +38,7 @@ public class ImageSearchFragment extends Fragment {
 
     private static final int SEARCH_QUERY_MIN_LENGTH = 3;
     private static final int SEARCH_DEBOUNCE = 300;
+    private static final int GRID_NUMBER_OF_COLUMNS = 2;
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
@@ -102,12 +103,22 @@ public class ImageSearchFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity().getApplicationContext(), 2);
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity().getApplicationContext(), GRID_NUMBER_OF_COLUMNS);
         imagesRecyclerView.setLayoutManager(gridLayoutManager);
 
         imagesAdapter = SmartAdapter.empty()
                 .map(Image.class, ImageItemViewHolder.class)
                 .into(imagesRecyclerView);
+
+        imagesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy <= 0) {
+                    return;
+                }
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
     }
 
     private void initListener() {
