@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.example.emmawegelid.unsplashapp.R;
 import com.example.emmawegelid.unsplashapp.listeners.ImageSearchListener;
@@ -58,6 +59,9 @@ public class ImageSearchFragment extends Fragment {
 
     @BindView(R.id.imagesRecyclerView)
     RecyclerView imagesRecyclerView;
+
+    @BindView(R.id.loadingIndicator)
+    ProgressBar loadingIndicator;
 
     public static ImageSearchFragment newInstance() {
         return new ImageSearchFragment();
@@ -174,6 +178,7 @@ public class ImageSearchFragment extends Fragment {
 
     private void search() {
         isLoading = true;
+        showLoadingBottom();
         disposables.add(NetworkManager.getInstance()
                 .getApiClient()
                 .searchForImages(currentQuery, pageToFetch)
@@ -184,6 +189,7 @@ public class ImageSearchFragment extends Fragment {
 
     private void onSearchSuccess(ImageSearchWrapper.Response response) {
         isLoading = false;
+        hideLoadingBottom();
         totalPages = response.total_pages;
         imageItems.addAll(response.results);
         imagesAdapter.setItems(imageItems);
@@ -194,6 +200,14 @@ public class ImageSearchFragment extends Fragment {
         final int itemCount = gridLayoutManager.getItemCount();
         final int lastItemPosition = gridLayoutManager.findLastVisibleItemPosition();
         return !isLoading && lastItemPosition + 1 >= itemCount && pageToFetch <= totalPages;
+    }
+
+    private void showLoadingBottom() {
+        loadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingBottom() {
+        loadingIndicator.setVisibility(View.GONE);
     }
 
 }
