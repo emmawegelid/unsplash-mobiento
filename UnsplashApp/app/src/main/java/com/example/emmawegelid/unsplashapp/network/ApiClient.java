@@ -12,7 +12,7 @@ public class ApiClient {
         this.api = api;
     }
 
-    public Observable<ImageSearchWrapper.Response> searchForImages(String query) {
-        return api.searchForImages(query);
+    public Observable<ImageSearchWrapper.Response> searchForImages(String query, int page) {
+        return api.searchForImages(query, page);
     }
 }

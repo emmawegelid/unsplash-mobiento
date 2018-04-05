@@ -9,6 +9,6 @@ import retrofit2.http.Query;
 public interface Api {
 
     @GET("search/photos?")
-    Observable<ImageSearchWrapper.Response> searchForImages(@Query("query") String query);
+    Observable<ImageSearchWrapper.Response> searchForImages(@Query("query") String query, @Query("page") int page);
 
 }

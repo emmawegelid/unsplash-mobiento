@@ -19,6 +19,8 @@ import com.example.emmawegelid.unsplashapp.network.NetworkManager;
 import com.example.emmawegelid.unsplashapp.network.wrappers.ImageSearchWrapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -45,6 +47,12 @@ public class ImageSearchFragment extends Fragment {
     private RecyclerMultiAdapter imagesAdapter;
     private ImageSearchListener imageSearchListener;
 
+    private int pageToFetch;
+    private int totalPages;
+    private boolean isLoading;
+    private String currentQuery;
+    private List<Image> imageItems;
+
     @BindView(R.id.searchEditText)
     EditText searchEditText;
 
@@ -70,7 +78,15 @@ public class ImageSearchFragment extends Fragment {
         initBindings();
         initRecyclerView();
         initListener();
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        pageToFetch = 1;
+        imageItems = new ArrayList<>();
     }
 
     @Override
@@ -99,7 +115,12 @@ public class ImageSearchFragment extends Fragment {
                 .map(String::toLowerCase)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::search));
+                .subscribe(query -> {
+                    currentQuery = query;
+                    imageItems.clear();
+                    pageToFetch = 1;
+                    search();
+                }));
     }
 
     private void initRecyclerView() {
@@ -117,6 +138,10 @@ public class ImageSearchFragment extends Fragment {
                     return;
                 }
                 super.onScrolled(recyclerView, dx, dy);
+                if (shouldFetchMoreImages()) {
+                    pageToFetch++;
+                    search();
+                }
             }
         });
     }
@@ -147,19 +172,28 @@ public class ImageSearchFragment extends Fragment {
         }
     }
 
-    private void search(String query) {
-        disposables.clear();
+    private void search() {
+        isLoading = true;
         disposables.add(NetworkManager.getInstance()
                 .getApiClient()
-                .searchForImages(query)
+                .searchForImages(currentQuery, pageToFetch)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSearchForImagesSuccess));
-
+                .subscribe(this::onSearchSuccess));
     }
 
-    private void onSearchForImagesSuccess(ImageSearchWrapper.Response response) {
-        imagesAdapter.setItems(response.results);
+    private void onSearchSuccess(ImageSearchWrapper.Response response) {
+        isLoading = false;
+        totalPages = response.total_pages;
+        imageItems.addAll(response.results);
+        imagesAdapter.setItems(imageItems);
+    }
+
+    private boolean shouldFetchMoreImages() {
+        GridLayoutManager gridLayoutManager = (GridLayoutManager) imagesRecyclerView.getLayoutManager();
+        final int itemCount = gridLayoutManager.getItemCount();
+        final int lastItemPosition = gridLayoutManager.findLastVisibleItemPosition();
+        return !isLoading && lastItemPosition + 1 >= itemCount && pageToFetch <= totalPages;
     }
 
 }
