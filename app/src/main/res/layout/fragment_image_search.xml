@@ -11,4 +11,10 @@
         android:layout_height="wrap_content"
         android:hint="@string/search_field_hint"/>
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/imagesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/searchEditText"/>
+
 </RelativeLayout>
