@@ -9,7 +9,9 @@
         android:id="@+id/searchEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/search_field_hint"/>
+        android:hint="@string/search_field_hint"
+        android:layout_marginStart="@dimen/padding_m"
+        android:layout_marginEnd="@dimen/padding_m"/>
 
     <TextView
         android:id="@+id/infoTextView"
