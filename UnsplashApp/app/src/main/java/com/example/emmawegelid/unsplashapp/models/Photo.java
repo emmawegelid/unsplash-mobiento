@@ -1,6 +1,6 @@
 package com.example.emmawegelid.unsplashapp.models;
 
-public class Image {
+public class Photo {
 
     public int width;
     public int height;

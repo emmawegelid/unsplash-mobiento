@@ -8,8 +8,8 @@
     android:id="@+id/rootLayout">
 
     <com.example.emmawegelid.unsplashapp.screens.GridViewItem
-        android:id="@+id/imageView"
-        android:layout_width="@dimen/image_thumb_nail_size"
-        android:layout_height="@dimen/image_thumb_nail_size"/>
+        android:id="@+id/photoImageView"
+        android:layout_width="@dimen/photo_thumb_nail_size"
+        android:layout_height="@dimen/photo_thumb_nail_size"/>
 
 </RelativeLayout>

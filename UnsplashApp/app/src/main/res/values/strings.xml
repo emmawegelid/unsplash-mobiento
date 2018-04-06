@@ -2,7 +2,7 @@
     <string name="app_name">UnsplashApp</string>
 
     <string name="search_field_hint">Type three characters or more to search</string>
-    <string name="image_search_title">Image search</string>
-    <string name="empty_search_result">No images were found, try with something else!</string>
+    <string name="photo_search_title">Photo search</string>
+    <string name="empty_search_result">No photos were found, try with something else!</string>
     <string name="search_error">Something went wrong, try again later.</string>
 </resources>

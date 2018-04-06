@@ -3,13 +3,13 @@ package com.example.emmawegelid.unsplashapp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.example.emmawegelid.unsplashapp.listeners.ImageSearchListener;
-import com.example.emmawegelid.unsplashapp.screens.FullScreenImageFragment;
-import com.example.emmawegelid.unsplashapp.screens.ImageSearchFragment;
+import com.example.emmawegelid.unsplashapp.listeners.PhotoSearchListener;
+import com.example.emmawegelid.unsplashapp.screens.FullScreenPhotoFragment;
+import com.example.emmawegelid.unsplashapp.screens.SearchPhotosFragment;
 
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ImageSearchListener {
+public class MainActivity extends AppCompatActivity implements PhotoSearchListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,17 +22,17 @@ public class MainActivity extends AppCompatActivity implements ImageSearchListen
     private void initFragments() {
         getFragmentManager()
                 .beginTransaction()
-                .add(R.id.contentFrame, ImageSearchFragment.newInstance(), ImageSearchFragment.TAG)
+                .add(R.id.contentFrame, SearchPhotosFragment.newInstance(), SearchPhotosFragment.TAG)
                 .commit();
         getFragmentManager().executePendingTransactions();
     }
 
     @Override
-    public void openFullScreenImage(String imageUrl) {
+    public void showFullScreenPhoto(String photoUrl) {
         getFragmentManager()
                 .beginTransaction()
-                .add(R.id.contentFrame, FullScreenImageFragment.newInstance(imageUrl), FullScreenImageFragment.TAG)
-                .addToBackStack(FullScreenImageFragment.TAG)
+                .add(R.id.contentFrame, FullScreenPhotoFragment.newInstance(photoUrl), FullScreenPhotoFragment.TAG)
+                .addToBackStack(FullScreenPhotoFragment.TAG)
                 .commit();
         getFragmentManager().executePendingTransactions();
     }

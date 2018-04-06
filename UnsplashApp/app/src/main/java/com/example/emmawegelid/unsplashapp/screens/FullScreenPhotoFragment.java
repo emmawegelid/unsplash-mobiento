@@ -20,31 +20,31 @@ import com.example.emmawegelid.unsplashapp.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FullScreenImageFragment extends Fragment {
+public class FullScreenPhotoFragment extends Fragment {
 
-    public static final String TAG = FullScreenImageFragment.class.getSimpleName();
+    public static final String TAG = FullScreenPhotoFragment.class.getSimpleName();
 
-    private static final String IMAGE_URL_ARG = "imageUrl";
+    private static final String PHOTO_URL_ARG = "photoUrl";
 
-    private String imageUrl;
+    private String photoUrl;
 
-    @BindView(R.id.fullScreenImageView)
-    ImageView fullScreenImageView;
+    @BindView(R.id.fullScreenPhotoView)
+    ImageView fullScreenPhotoView;
 
     @BindView(R.id.loadingIndicator)
     ProgressBar loadingIndicator;
 
-    public static FullScreenImageFragment newInstance(String imageUrl) {
+    public static FullScreenPhotoFragment newInstance(String photoUrl) {
         Bundle args = new Bundle();
-        FullScreenImageFragment fragment = new FullScreenImageFragment();
-        args.putString(IMAGE_URL_ARG, imageUrl);
+        FullScreenPhotoFragment fragment = new FullScreenPhotoFragment();
+        args.putString(PHOTO_URL_ARG, photoUrl);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_fullscreen_image, container, false);
+        View view = inflater.inflate(R.layout.fragment_fullscreen_photo, container, false);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -52,13 +52,13 @@ public class FullScreenImageFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        imageUrl = getArguments().getString(IMAGE_URL_ARG);
+        photoUrl = getArguments().getString(PHOTO_URL_ARG);
         initUI();
     }
 
     private void initUI() {
         Glide.with(this)
-                .load(imageUrl)
+                .load(photoUrl)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -72,7 +72,7 @@ public class FullScreenImageFragment extends Fragment {
                         return false;
                     }
                 })
-                .into(fullScreenImageView);
+                .into(fullScreenPhotoView);
     }
 
 }

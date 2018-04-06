@@ -1,6 +1,6 @@
 package com.example.emmawegelid.unsplashapp.network;
 
-import com.example.emmawegelid.unsplashapp.network.wrappers.ImageSearchWrapper;
+import com.example.emmawegelid.unsplashapp.network.wrappers.PhotoSearchWrapper;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
@@ -9,6 +9,6 @@ import retrofit2.http.Query;
 public interface Api {
 
     @GET("search/photos?")
-    Observable<ImageSearchWrapper.Response> searchForImages(@Query("query") String query, @Query("page") int page);
+    Observable<PhotoSearchWrapper.Response> searchPhotos(@Query("query") String query, @Query("page") int page);
 
 }

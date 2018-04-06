@@ -6,30 +6,30 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.emmawegelid.unsplashapp.R;
-import com.example.emmawegelid.unsplashapp.models.Image;
+import com.example.emmawegelid.unsplashapp.models.Photo;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.nlopez.smartadapters.views.BindableRelativeLayout;
 
-public class ImageItemViewHolder extends BindableRelativeLayout<Image> {
+public class PhotoItemViewHolder extends BindableRelativeLayout<Photo> {
 
-    public static final int IMAGE_TAPPED = 0;
+    public static final int PHOTO_TAPPED = 0;
 
     private Context context;
 
-    @BindView(R.id.imageView)
-    ImageView imageView;
+    @BindView(R.id.photoImageView)
+    ImageView photoImageView;
 
-    public ImageItemViewHolder(Context context) {
+    public PhotoItemViewHolder(Context context) {
         super(context);
         this.context = context;
     }
 
     @Override
     public int getLayoutId() {
-        return R.layout.image_item;
+        return R.layout.photo_item;
     }
 
     @Override
@@ -39,15 +39,15 @@ public class ImageItemViewHolder extends BindableRelativeLayout<Image> {
     }
 
     @Override
-    public void bind(Image image) {
+    public void bind(Photo photo) {
         Glide.with(context)
-                .load(image.urls.thumb)
+                .load(photo.urls.thumb)
                 .apply(RequestOptions.centerCropTransform())
-                .into(imageView);
+                .into(photoImageView);
     }
 
     @OnClick(R.id.rootLayout)
     public void showFullScreenImage() {
-        notifyItemAction(IMAGE_TAPPED);
+        notifyItemAction(PHOTO_TAPPED);
     }
 }

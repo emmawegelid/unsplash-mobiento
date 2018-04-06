@@ -15,10 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.emmawegelid.unsplashapp.R;
-import com.example.emmawegelid.unsplashapp.listeners.ImageSearchListener;
-import com.example.emmawegelid.unsplashapp.models.Image;
+import com.example.emmawegelid.unsplashapp.listeners.PhotoSearchListener;
+import com.example.emmawegelid.unsplashapp.models.Photo;
 import com.example.emmawegelid.unsplashapp.network.NetworkManager;
-import com.example.emmawegelid.unsplashapp.network.wrappers.ImageSearchWrapper;
+import com.example.emmawegelid.unsplashapp.network.wrappers.PhotoSearchWrapper;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
 import java.util.ArrayList;
@@ -34,11 +34,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.example.emmawegelid.unsplashapp.screens.ImageItemViewHolder.IMAGE_TAPPED;
+import static com.example.emmawegelid.unsplashapp.screens.PhotoItemViewHolder.PHOTO_TAPPED;
 
-public class ImageSearchFragment extends Fragment {
+public class SearchPhotosFragment extends Fragment {
 
-    public static final String TAG = ImageSearchFragment.class.getSimpleName();
+    public static final String TAG = SearchPhotosFragment.class.getSimpleName();
 
     private static final int SEARCH_QUERY_MIN_LENGTH = 3;
     private static final int SEARCH_DEBOUNCE = 300;
@@ -46,14 +46,14 @@ public class ImageSearchFragment extends Fragment {
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    private RecyclerMultiAdapter imagesAdapter;
-    private ImageSearchListener imageSearchListener;
+    private RecyclerMultiAdapter photosAdapter;
+    private PhotoSearchListener photoSearchListener;
 
     private int pageToFetch;
     private int totalPages;
     private boolean isLoading;
     private String currentQuery;
-    private List<Image> imageItems;
+    private List<Photo> photoItems;
 
     @BindView(R.id.searchEditText)
     EditText searchEditText;
@@ -61,8 +61,8 @@ public class ImageSearchFragment extends Fragment {
     @BindView(R.id.infoTextView)
     TextView infoTextView;
 
-    @BindView(R.id.imagesRecyclerView)
-    RecyclerView imagesRecyclerView;
+    @BindView(R.id.photosRecyclerView)
+    RecyclerView photosRecyclerView;
 
     @BindView(R.id.loadingIndicator)
     ProgressBar loadingIndicator;
@@ -70,25 +70,25 @@ public class ImageSearchFragment extends Fragment {
     @BindView(R.id.loadingBottomIndicator)
     ProgressBar loadingBottomIndicator;
 
-    public static ImageSearchFragment newInstance() {
-        return new ImageSearchFragment();
+    public static SearchPhotosFragment newInstance() {
+        return new SearchPhotosFragment();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof ImageSearchListener) {
-            imageSearchListener = (ImageSearchListener) context;
+        if (context instanceof PhotoSearchListener) {
+            photoSearchListener = (PhotoSearchListener) context;
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_image_search, container, false);
+        View view = inflater.inflate(R.layout.fragment_photo_search, container, false);
         ButterKnife.bind(this, view);
         initBindings();
         initRecyclerView();
-        initImageViewEventListener();
+        initPhotoViewEventListener();
 
         return view;
     }
@@ -97,19 +97,19 @@ public class ImageSearchFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         pageToFetch = 1;
-        imageItems = new ArrayList<>();
+        photoItems = new ArrayList<>();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().setTitle(getString(R.string.image_search_title));
+        getActivity().setTitle(getString(R.string.photo_search_title));
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        imageSearchListener = null;
+        photoSearchListener = null;
     }
 
     @Override
@@ -134,7 +134,7 @@ public class ImageSearchFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(query -> {
                     currentQuery = query;
-                    imageItems.clear();
+                    photoItems.clear();
                     pageToFetch = 1;
                     showLoading();
                     search();
@@ -143,13 +143,13 @@ public class ImageSearchFragment extends Fragment {
 
     private void initRecyclerView() {
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity().getApplicationContext(), GRID_NUMBER_OF_COLUMNS);
-        imagesRecyclerView.setLayoutManager(gridLayoutManager);
+        photosRecyclerView.setLayoutManager(gridLayoutManager);
 
-        imagesAdapter = SmartAdapter.empty()
-                .map(Image.class, ImageItemViewHolder.class)
-                .into(imagesRecyclerView);
+        photosAdapter = SmartAdapter.empty()
+                .map(Photo.class, PhotoItemViewHolder.class)
+                .into(photosRecyclerView);
 
-        imagesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        photosRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy <= 0) {
@@ -157,7 +157,7 @@ public class ImageSearchFragment extends Fragment {
                 }
                 super.onScrolled(recyclerView, dx, dy);
                 hideKeyboard();
-                if (shouldFetchMoreImages()) {
+                if (shouldFetchMorePhotos()) {
                     showLoadingBottom();
                     pageToFetch++;
                     search();
@@ -166,30 +166,30 @@ public class ImageSearchFragment extends Fragment {
         });
     }
 
-    private void initImageViewEventListener() {
+    private void initPhotoViewEventListener() {
         ViewEventListener listener = (actionId, object, position, view) -> {
-            Image image = (Image) object;
+            Photo photo = (Photo) object;
             switch (actionId) {
-                case IMAGE_TAPPED:
-                    showFullScreenImage(image.urls.regular);
+                case PHOTO_TAPPED:
+                    showFullScreenPhoto(photo.urls.regular);
                     break;
             }
         };
 
-        imagesAdapter.setViewEventListener(listener);
+        photosAdapter.setViewEventListener(listener);
     }
 
     private void clearSearch() {
         hideInfoTextView();
-        if (imageItems != null) {
-            imageItems.clear();
-            imagesAdapter.setItems(imageItems);
+        if (photoItems != null) {
+            photoItems.clear();
+            photosAdapter.setItems(photoItems);
         }
     }
 
-    private void showFullScreenImage(String imageUrl) {
+    private void showFullScreenPhoto(String photoUrl) {
         hideKeyboard();
-        imageSearchListener.openFullScreenImage(imageUrl);
+        photoSearchListener.showFullScreenPhoto(photoUrl);
     }
 
     private void hideKeyboard() {
@@ -207,18 +207,18 @@ public class ImageSearchFragment extends Fragment {
         isLoading = true;
         disposables.add(NetworkManager.getInstance()
                 .getApiClient()
-                .searchForImages(currentQuery, pageToFetch)
+                .searchPhotos(currentQuery, pageToFetch)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSearchSuccess, throwable -> onSearchError()));
     }
 
-    private void onSearchSuccess(ImageSearchWrapper.Response response) {
+    private void onSearchSuccess(PhotoSearchWrapper.Response response) {
         hideLoadingIndicators();
         totalPages = response.total_pages;
-        imageItems.addAll(response.results);
-        imagesAdapter.setItems(imageItems);
-        if (imageItems.isEmpty()) {
+        photoItems.addAll(response.results);
+        photosAdapter.setItems(photoItems);
+        if (photoItems.isEmpty()) {
             showInfoTextView(R.string.empty_search_result);
         }
     }
@@ -228,8 +228,8 @@ public class ImageSearchFragment extends Fragment {
         showInfoTextView(R.string.search_error);
     }
 
-    private boolean shouldFetchMoreImages() {
-        GridLayoutManager gridLayoutManager = (GridLayoutManager) imagesRecyclerView.getLayoutManager();
+    private boolean shouldFetchMorePhotos() {
+        GridLayoutManager gridLayoutManager = (GridLayoutManager) photosRecyclerView.getLayoutManager();
         final int itemCount = gridLayoutManager.getItemCount();
         final int lastItemPosition = gridLayoutManager.findLastVisibleItemPosition();
         return !isLoading && lastItemPosition + 1 >= itemCount && pageToFetch <= totalPages;

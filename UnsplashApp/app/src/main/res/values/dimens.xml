@@ -4,6 +4,8 @@
     <dimen name="padding_m">8dp</dimen>
     <dimen name="padding_l">16dp</dimen>
 
-    <dimen name="image_thumb_nail_size">150dp</dimen>
+    <dimen name="photo_thumb_nail_size">150dp</dimen>
     <dimen name="loading_indicator_size">40dp</dimen>
+
+    <dimen name="search_field_text_size">14sp</dimen>
 </resources>

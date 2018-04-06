@@ -1,15 +1,14 @@
 package com.example.emmawegelid.unsplashapp.network.wrappers;
 
-import com.example.emmawegelid.unsplashapp.models.Image;
+import com.example.emmawegelid.unsplashapp.models.Photo;
 
 import java.util.List;
 
-public class ImageSearchWrapper {
+public class PhotoSearchWrapper {
 
     public static class Response {
-        public int total;
         public int total_pages;
-        public List<Image> results;
+        public List<Photo> results;
     }
 
 }
