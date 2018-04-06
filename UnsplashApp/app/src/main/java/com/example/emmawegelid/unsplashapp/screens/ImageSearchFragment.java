@@ -88,7 +88,7 @@ public class ImageSearchFragment extends Fragment {
         ButterKnife.bind(this, view);
         initBindings();
         initRecyclerView();
-        initListener();
+        initImageViewEventListener();
 
         return view;
     }
@@ -141,14 +141,6 @@ public class ImageSearchFragment extends Fragment {
                 }));
     }
 
-    private void clearSearch() {
-        hideInfoTextView();
-        if (imageItems != null) {
-            imageItems.clear();
-            imagesAdapter.setItems(imageItems);
-        }
-    }
-
     private void initRecyclerView() {
         final GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity().getApplicationContext(), GRID_NUMBER_OF_COLUMNS);
         imagesRecyclerView.setLayoutManager(gridLayoutManager);
@@ -164,6 +156,7 @@ public class ImageSearchFragment extends Fragment {
                     return;
                 }
                 super.onScrolled(recyclerView, dx, dy);
+                hideKeyboard();
                 if (shouldFetchMoreImages()) {
                     showLoadingBottom();
                     pageToFetch++;
@@ -173,7 +166,7 @@ public class ImageSearchFragment extends Fragment {
         });
     }
 
-    private void initListener() {
+    private void initImageViewEventListener() {
         ViewEventListener listener = (actionId, object, position, view) -> {
             Image image = (Image) object;
             switch (actionId) {
@@ -184,6 +177,14 @@ public class ImageSearchFragment extends Fragment {
         };
 
         imagesAdapter.setViewEventListener(listener);
+    }
+
+    private void clearSearch() {
+        hideInfoTextView();
+        if (imageItems != null) {
+            imageItems.clear();
+            imagesAdapter.setItems(imageItems);
+        }
     }
 
     private void showFullScreenImage(String imageUrl) {
