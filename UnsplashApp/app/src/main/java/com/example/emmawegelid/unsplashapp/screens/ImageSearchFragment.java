@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.emmawegelid.unsplashapp.R;
 import com.example.emmawegelid.unsplashapp.listeners.ImageSearchListener;
@@ -57,11 +58,17 @@ public class ImageSearchFragment extends Fragment {
     @BindView(R.id.searchEditText)
     EditText searchEditText;
 
+    @BindView(R.id.infoTextView)
+    TextView infoTextView;
+
     @BindView(R.id.imagesRecyclerView)
     RecyclerView imagesRecyclerView;
 
     @BindView(R.id.loadingIndicator)
     ProgressBar loadingIndicator;
+
+    @BindView(R.id.loadingBottomIndicator)
+    ProgressBar loadingBottomIndicator;
 
     public static ImageSearchFragment newInstance() {
         return new ImageSearchFragment();
@@ -113,6 +120,12 @@ public class ImageSearchFragment extends Fragment {
 
     private void initBindings() {
         disposables.add(RxTextView.textChanges(searchEditText)
+                .map(charSequence -> {
+                    if (charSequence.toString().isEmpty()) {
+                        clearSearch();
+                    }
+                    return charSequence;
+                })
                 .filter(charSequence -> charSequence.length() >= SEARCH_QUERY_MIN_LENGTH)
                 .debounce(SEARCH_DEBOUNCE, TimeUnit.MILLISECONDS)
                 .map(CharSequence::toString)
@@ -123,8 +136,17 @@ public class ImageSearchFragment extends Fragment {
                     currentQuery = query;
                     imageItems.clear();
                     pageToFetch = 1;
+                    showLoading();
                     search();
                 }));
+    }
+
+    private void clearSearch() {
+        hideInfoTextView();
+        if (imageItems != null) {
+            imageItems.clear();
+            imagesAdapter.setItems(imageItems);
+        }
     }
 
     private void initRecyclerView() {
@@ -143,6 +165,7 @@ public class ImageSearchFragment extends Fragment {
                 }
                 super.onScrolled(recyclerView, dx, dy);
                 if (shouldFetchMoreImages()) {
+                    showLoadingBottom();
                     pageToFetch++;
                     search();
                 }
@@ -172,27 +195,36 @@ public class ImageSearchFragment extends Fragment {
         View view = getActivity().getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)getActivity().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
     }
 
     private void search() {
+        hideInfoTextView();
         isLoading = true;
-        showLoadingBottom();
         disposables.add(NetworkManager.getInstance()
                 .getApiClient()
                 .searchForImages(currentQuery, pageToFetch)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onSearchSuccess));
+                .subscribe(this::onSearchSuccess, throwable -> onSearchError()));
     }
 
     private void onSearchSuccess(ImageSearchWrapper.Response response) {
-        isLoading = false;
-        hideLoadingBottom();
+        hideLoadingIndicators();
         totalPages = response.total_pages;
         imageItems.addAll(response.results);
         imagesAdapter.setItems(imageItems);
+        if (imageItems.isEmpty()) {
+            showInfoTextView(R.string.empty_search_result);
+        }
+    }
+
+    private void onSearchError() {
+        hideLoadingIndicators();
+        showInfoTextView(R.string.search_error);
     }
 
     private boolean shouldFetchMoreImages() {
@@ -202,11 +234,34 @@ public class ImageSearchFragment extends Fragment {
         return !isLoading && lastItemPosition + 1 >= itemCount && pageToFetch <= totalPages;
     }
 
+    private void showInfoTextView(int resourceId) {
+        infoTextView.setVisibility(View.VISIBLE);
+        infoTextView.setText(resourceId);
+    }
+
+    private void hideInfoTextView() {
+        infoTextView.setVisibility(View.GONE);
+    }
+
+    private void hideLoadingIndicators() {
+        isLoading = false;
+        hideLoading();
+        hideLoadingBottom();
+    }
+
     private void showLoadingBottom() {
-        loadingIndicator.setVisibility(View.VISIBLE);
+        loadingBottomIndicator.setVisibility(View.VISIBLE);
     }
 
     private void hideLoadingBottom() {
+        loadingBottomIndicator.setVisibility(View.GONE);
+    }
+
+    private void showLoading() {
+        loadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
         loadingIndicator.setVisibility(View.GONE);
     }
 
